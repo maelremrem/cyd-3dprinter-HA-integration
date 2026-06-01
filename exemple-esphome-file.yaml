@@ -1,0 +1,169 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CYD 3D Printer Dashboard — User configuration file
+# Copy this file, rename it, and fill in your own values.
+#
+# No clone needed — the full dashboard is loaded from GitHub automatically.
+# Source: https://github.com/maelremrem/cyd-3dprinter-HA-integration
+# ─────────────────────────────────────────────────────────────────────────────
+
+substitutions:
+  device_name: cyd-3d-dashboard       # ESPHome device name (no spaces)
+  friendly_name: CYD 3D Dashboard     # Displayed in Home Assistant
+  short_name: X1C                     # Short label shown on the display
+
+  # ── API / OTA / Wi-Fi credentials ─────────────────────────────────────────
+  # Leave as !secret and define these in your secrets.yaml or put thme here
+  ha_api_key: !secret ha_api_key
+  ota_password: !secret ota_password
+  wifi_ssid: !secret wifi_ssid
+  wifi_password: !secret wifi_password
+
+  # ── Home Assistant printer entities ────────────────────────────────────────
+  # Replace each value with your own entity IDs from the Bambu Lab integration
+  # (or any other printer integration exposing similar sensors)
+  printer_progress_entity: sensor.YOUR_PRINTER_print_progress
+  printer_nozzle_entity: sensor.YOUR_PRINTER_nozzle_temperature
+  printer_bed_entity: sensor.YOUR_PRINTER_bed_temperature
+  printer_time_entity: sensor.YOUR_PRINTER_remaining_time
+  printer_layer_entity: sensor.YOUR_PRINTER_current_layer
+  printer_total_layer_entity: sensor.YOUR_PRINTER_total_layer_count
+  printer_state_entity: sensor.YOUR_PRINTER_print_status
+  printer_start_time_entity: sensor.YOUR_PRINTER_start_time
+  printer_end_time_entity: sensor.YOUR_PRINTER_end_time
+  printer_power_entity: sensor.YOUR_PRINTER_power
+  quick_action_title: "Turn on printer"
+  quick_action_entity: switch.YOUR_PRINTER_switch
+
+  ha_clock_entity: sensor.time        # Standard HA time sensor (HH:MM)
+
+  # ── CYD hardware pins ─────────────────────────────────────────────────────
+  # Default values match the standard CYD (Cheap Yellow Display) board.
+  # Only change these if your board uses different GPIO assignments.
+  pin_spi_clk: GPIO14
+  pin_spi_mosi: GPIO13
+  pin_spi_miso: GPIO12
+  pin_tft_cs: GPIO15
+  pin_tft_dc: GPIO2
+  pin_tft_bl: GPIO21
+  pin_touch_cs: GPIO33
+  pin_touch_irq: GPIO36
+  pin_touch_clk: GPIO25
+  pin_touch_mosi: GPIO32
+  pin_touch_miso: GPIO39
+  pin_rgb_r: GPIO17
+  pin_rgb_g: GPIO16
+  pin_rgb_b: GPIO27
+
+  # ── Display config ─────────────────────────────────────────────────────────
+  display_w: "320"
+  display_h: "240"
+  display_swap_xy: "true"
+  display_mirror_x: "false"
+  display_mirror_y: "false"
+
+  # ── Touch calibration ──────────────────────────────────────────────────────
+  touch_swap_xy: "true"
+  touch_mirror_x: "false"
+  touch_mirror_y: "false"
+  touch_cal_x_min: "280"
+  touch_cal_x_max: "3860"
+  touch_cal_y_min: "340"
+  touch_cal_y_max: "3860"
+
+  # ── Color palettes ─────────────────────────────────────────────────────────
+  # All 8 palettes are defined below. The active theme/palette is selected
+  # at runtime from the dashboard UI — no need to edit these unless you want
+  # to customize individual colors.
+
+  # Mockup / Tactical (default dark blue)
+  color_mockup_bg: 0x5A6F86
+  color_mockup_card: 0x121A2B
+  color_mockup_card_soft: 0x1A2640
+  color_mockup_text: 0xEAF0FF
+  color_mockup_muted: 0x8DA3C7
+  color_mockup_accent: 0x3DDC97
+  color_mockup_hot: 0xFF8A3D
+
+  # Brutal — bold and vibrant
+  color_brutal_bg: 0xFFE9D2
+  color_brutal_card: 0xFFF8EF
+  color_brutal_ink: 0x111111
+  color_brutal_accent: 0xFF6B35
+  color_brutal_secondary: 0x2EC4B6
+  color_brutal_hot: 0xFFD166
+  color_brutal_cold: 0x3A86FF
+
+  # Orbit — modern dark with cyan/orange
+  color_orbit_bg: 0x162543
+  color_orbit_panel: 0x101F38
+  color_orbit_panel_soft: 0x192C4D
+  color_orbit_text: 0xEDF5FF
+  color_orbit_muted: 0x9AB1D8
+  color_orbit_accent: 0x4CC9F0
+  color_orbit_hot: 0xFF7C43
+  color_orbit_cold: 0x55B6FF
+
+  # Blueprint — soft pastels
+  color_blueprint_bg: 0xF5F8FD
+  color_blueprint_panel: 0xFFFFFF
+  color_blueprint_ink: 0x0E223D
+  color_blueprint_line: 0xC8D8EE
+  color_blueprint_line_strong: 0x7EA0CB
+  color_blueprint_accent: 0xFF5F2E
+  color_blueprint_accent_2: 0x2A9D8F
+
+  # Apple-like — clean minimalist
+  color_apple_bg: 0xF7FAFF
+  color_apple_panel: 0xFFFFFF
+  color_apple_ink: 0x0B1E38
+  color_apple_text: 0x222533
+  color_apple_muted: 0x8B95A5
+  color_apple_accent: 0x007AFF
+  color_apple_hot: 0xFF3B30
+  color_apple_cold: 0x34C759
+
+  # Modern Grid — neon lime & cyan on dark
+  color_grid_bg: 0x1B1E23
+  color_grid_panel: 0x15181D
+  color_grid_panel_soft: 0x1D2128
+  color_grid_text: 0xF5F7FB
+  color_grid_muted: 0xA5AFBF
+  color_grid_accent: 0xB5FF3D
+  color_grid_accent_2: 0x3DD6FF
+  color_grid_hot: 0xFF8F5A
+  color_grid_cold: 0x66B8FF
+
+  # Skeuomorphic — metallic with bevel
+  color_skeuo_metal_a: 0x6F7886
+  color_skeuo_metal_b: 0x505764
+  color_skeuo_metal_c: 0x3F4550
+  color_skeuo_panel: 0x2D323B
+  color_skeuo_text: 0xF7FBFF
+  color_skeuo_muted: 0xB9C4D6
+  color_skeuo_accent: 0x4DD9FF
+  color_skeuo_hot: 0xFF9A6B
+  color_skeuo_cold: 0x7FC9FF
+
+  # Monitor — warm Bambu-inspired dark UI
+  color_monitor_bg: 0x1E161B
+  color_monitor_card: 0x2A1F26
+  color_monitor_card_soft: 0x352830
+  color_monitor_line: 0x5B4652
+  color_monitor_text: 0xF6DCE8
+  color_monitor_muted: 0xC8ABB8
+  color_monitor_accent: 0xF29D59
+  color_monitor_hot: 0xFFB46E
+  color_monitor_cold: 0x8FD68C
+  color_monitor_success: 0x88CE87
+  color_monitor_on_accent: 0x2A1F26
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Remote package — downloads the full dashboard firmware from GitHub.
+# ESPHome caches it locally and refreshes once per day.
+# ─────────────────────────────────────────────────────────────────────────────
+packages:
+  dashboard:
+    url: https://github.com/maelremrem/cyd-3dprinter-HA-integration
+    file: packages/cyd-dashboard.yaml
+    ref: main
+    refresh: 1d
