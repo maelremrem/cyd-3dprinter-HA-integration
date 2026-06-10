@@ -47,7 +47,12 @@ esphome:
                 id: loading_step2_status
                 text: !lambda |-
                   auto ips = id(wifi_main).get_ip_addresses();
-                  return ips.empty() ? std::string("N/A") : ips[0].str();
+                  if (ips.empty()) {
+                    return std::string("N/A");
+                  }
+                  char buf[IP_ADDRESS_BUFFER_SIZE];
+                  ips[0].str_to(buf);
+                  return std::string(buf);
                 text_color: 0x35D08A
           else:
             - lvgl.label.update:
@@ -469,6 +474,13 @@ font:
       family: Audiowide
     id: font_tactical_clock
     size: 11
+    bpp: 4
+
+  - file:
+      type: gfonts
+      family: Montserrat
+    id: montserrat_8
+    size: 8
     bpp: 4
 
   - file:
@@ -1070,7 +1082,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: bed_value
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1123,7 +1143,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: orbit_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: orbit_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: orbit_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1252,7 +1280,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: monitor_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: monitor_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: monitor_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1301,7 +1337,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: blueprint_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: blueprint_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: blueprint_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1342,7 +1386,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: brutal_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: brutal_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: brutal_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1379,7 +1431,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: apple_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: apple_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: apple_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1424,7 +1484,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: grid_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: grid_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: grid_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1469,7 +1537,15 @@ script:
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_hot_color));
             - lvgl.widget.update:
+                id: skeuo_nozzle_unit
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_hot_color));
+            - lvgl.widget.update:
                 id: skeuo_bed
+                text_color: !lambda |-
+                  return lv_color_hex(id(palette_cold_color));
+            - lvgl.widget.update:
+                id: skeuo_bed_unit
                 text_color: !lambda |-
                   return lv_color_hex(id(palette_cold_color));
             - lvgl.widget.update:
@@ -1564,59 +1640,22 @@ script:
       - lvgl.label.update:
           id: clock_value
           text: !lambda |-
-            static std::string last_valid = "--:--:--";
-            static int last_base_hour = -1;
-            static int last_base_minute = -1;
-            static uint32_t last_base_ms = 0;
             auto now = id(ha_time).now();
             if (now.is_valid()) {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
-              last_valid = buf;
-              return last_valid;
+              char buf[8];
+              snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
+              return std::string(buf);
             }
 
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
-              if (ha_clock.size() == 8 && ha_clock[2] == ':' && ha_clock[5] == ':') {
-                last_valid = ha_clock;
-                return last_valid;
-              }
-              if (ha_clock.size() == 5 && ha_clock[2] == ':') {
-                auto is_digit = [](char c) -> bool { return c >= '0' && c <= '9'; };
-                if (is_digit(ha_clock[0]) && is_digit(ha_clock[1]) && is_digit(ha_clock[3]) && is_digit(ha_clock[4])) {
-                  const int base_hour = (ha_clock[0] - '0') * 10 + (ha_clock[1] - '0');
-                  const int base_minute = (ha_clock[3] - '0') * 10 + (ha_clock[4] - '0');
-
-                  if (base_hour != last_base_hour || base_minute != last_base_minute) {
-                    last_base_hour = base_hour;
-                    last_base_minute = base_minute;
-                    last_base_ms = millis();
-                  }
-
-                  uint32_t elapsed_seconds = (millis() - last_base_ms) / 1000;
-                  uint32_t total_seconds = static_cast<uint32_t>(base_hour * 3600 + base_minute * 60);
-                  total_seconds = (total_seconds + elapsed_seconds) % 86400UL;
-
-                  char buf[16];
-                  snprintf(
-                      buf,
-                      sizeof(buf),
-                      "%02lu:%02lu:%02lu",
-                      total_seconds / 3600UL,
-                      (total_seconds / 60UL) % 60UL,
-                      total_seconds % 60UL);
-                  last_valid = buf;
-                  return last_valid;
-                }
-
-                last_valid = ha_clock + ":00";
-                return last_valid;
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
               }
               return ha_clock;
             }
 
-            return last_valid;
+            return std::string("--:--");
 
       - lvgl.label.update:
           id: status_value
@@ -1790,10 +1829,10 @@ script:
           id: nozzle_value
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -1815,10 +1854,10 @@ script:
           id: bed_value
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -1912,59 +1951,22 @@ script:
       - lvgl.label.update:
           id: monitor_clock
           text: !lambda |-
-            static std::string last_valid = "--:--:--";
-            static int last_base_hour = -1;
-            static int last_base_minute = -1;
-            static uint32_t last_base_ms = 0;
             auto now = id(ha_time).now();
             if (now.is_valid()) {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
-              last_valid = buf;
-              return last_valid;
+              char buf[8];
+              snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
+              return std::string(buf);
             }
 
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
-              if (ha_clock.size() == 8 && ha_clock[2] == ':' && ha_clock[5] == ':') {
-                last_valid = ha_clock;
-                return last_valid;
-              }
-              if (ha_clock.size() == 5 && ha_clock[2] == ':') {
-                auto is_digit = [](char c) -> bool { return c >= '0' && c <= '9'; };
-                if (is_digit(ha_clock[0]) && is_digit(ha_clock[1]) && is_digit(ha_clock[3]) && is_digit(ha_clock[4])) {
-                  const int base_hour = (ha_clock[0] - '0') * 10 + (ha_clock[1] - '0');
-                  const int base_minute = (ha_clock[3] - '0') * 10 + (ha_clock[4] - '0');
-
-                  if (base_hour != last_base_hour || base_minute != last_base_minute) {
-                    last_base_hour = base_hour;
-                    last_base_minute = base_minute;
-                    last_base_ms = millis();
-                  }
-
-                  uint32_t elapsed_seconds = (millis() - last_base_ms) / 1000;
-                  uint32_t total_seconds = static_cast<uint32_t>(base_hour * 3600 + base_minute * 60);
-                  total_seconds = (total_seconds + elapsed_seconds) % 86400UL;
-
-                  char buf[16];
-                  snprintf(
-                      buf,
-                      sizeof(buf),
-                      "%02lu:%02lu:%02lu",
-                      total_seconds / 3600UL,
-                      (total_seconds / 60UL) % 60UL,
-                      total_seconds % 60UL);
-                  last_valid = buf;
-                  return last_valid;
-                }
-
-                last_valid = ha_clock + ":00";
-                return last_valid;
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
               }
               return ha_clock;
             }
 
-            return last_valid;
+            return std::string("--:--");
 
       - lvgl.label.update:
           id: monitor_progress
@@ -2017,20 +2019,20 @@ script:
           id: monitor_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.label.update:
           id: monitor_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -2218,6 +2220,13 @@ script:
               return std::string("--");
             }
 
+            if (power == "on") {
+              return std::string("On");
+            }
+            if (power == "off") {
+              return std::string("Off");
+            }
+
             if (power.size() > 2 && power.substr(power.size() - 2) == ".0") {
               power.resize(power.size() - 2);
             }
@@ -2232,7 +2241,7 @@ script:
       - lvgl.label.update:
           id: quick_action_state_label
           text: !lambda |-
-            return id(quick_action_entity_state).state ? std::string("ON") : std::string("OFF");
+            return id(quick_action_entity_state).state ? std::string("On") : std::string("Off");
           text_color: !lambda |-
             if (!id(api_server).is_connected()) {
               return lv_color_hex(id(palette_muted_color));
@@ -2457,6 +2466,9 @@ script:
 
             std::string clock = id(ha_clock_text).state;
             if (!clock.empty() && clock != "unknown" && clock != "unavailable") {
+              if (clock.size() >= 5 && clock[2] == ':') {
+                clock = clock.substr(0, 5);
+              }
               return std::string("--/--/---- ") + clock;
             }
             return std::string("--/--/---- --:--");
@@ -2487,59 +2499,22 @@ script:
       - lvgl.label.update:
           id: orbit_clock
           text: !lambda |-
-            static std::string last_valid = "--:--:--";
-            static int last_base_hour = -1;
-            static int last_base_minute = -1;
-            static uint32_t last_base_ms = 0;
             auto now = id(ha_time).now();
             if (now.is_valid()) {
-              char buf[16];
-              snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
-              last_valid = buf;
-              return last_valid;
+              char buf[8];
+              snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
+              return std::string(buf);
             }
 
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
-              if (ha_clock.size() == 8 && ha_clock[2] == ':' && ha_clock[5] == ':') {
-                last_valid = ha_clock;
-                return last_valid;
-              }
-              if (ha_clock.size() == 5 && ha_clock[2] == ':') {
-                auto is_digit = [](char c) -> bool { return c >= '0' && c <= '9'; };
-                if (is_digit(ha_clock[0]) && is_digit(ha_clock[1]) && is_digit(ha_clock[3]) && is_digit(ha_clock[4])) {
-                  const int base_hour = (ha_clock[0] - '0') * 10 + (ha_clock[1] - '0');
-                  const int base_minute = (ha_clock[3] - '0') * 10 + (ha_clock[4] - '0');
-
-                  if (base_hour != last_base_hour || base_minute != last_base_minute) {
-                    last_base_hour = base_hour;
-                    last_base_minute = base_minute;
-                    last_base_ms = millis();
-                  }
-
-                  uint32_t elapsed_seconds = (millis() - last_base_ms) / 1000;
-                  uint32_t total_seconds = static_cast<uint32_t>(base_hour * 3600 + base_minute * 60);
-                  total_seconds = (total_seconds + elapsed_seconds) % 86400UL;
-
-                  char buf[16];
-                  snprintf(
-                      buf,
-                      sizeof(buf),
-                      "%02lu:%02lu:%02lu",
-                      total_seconds / 3600UL,
-                      (total_seconds / 60UL) % 60UL,
-                      total_seconds % 60UL);
-                  last_valid = buf;
-                  return last_valid;
-                }
-
-                last_valid = ha_clock + ":00";
-                return last_valid;
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
               }
               return ha_clock;
             }
 
-            return last_valid;
+            return std::string("--:--");
 
       - lvgl.label.update:
           id: orbit_status
@@ -2596,20 +2571,20 @@ script:
           id: orbit_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.label.update:
           id: orbit_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -2686,14 +2661,17 @@ script:
           text: !lambda |-
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
+              }
               return ha_clock;
             }
             auto now = id(ha_time).now();
             if (!now.is_valid()) {
-              return std::string("--:--:--");
+              return std::string("--:--");
             }
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
+            char buf[8];
+            snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -2742,10 +2720,10 @@ script:
           id: blueprint_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), " %.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -2767,10 +2745,10 @@ script:
           id: blueprint_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -2847,14 +2825,17 @@ script:
           text: !lambda |-
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
+              }
               return ha_clock;
             }
             auto now = id(ha_time).now();
             if (!now.is_valid()) {
-              return std::string("--:--:--");
+              return std::string("--:--");
             }
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
+            char buf[8];
+            snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -2903,10 +2884,10 @@ script:
           id: brutal_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), " %.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -2928,10 +2909,10 @@ script:
           id: brutal_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3008,14 +2989,17 @@ script:
           text: !lambda |-
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
+              }
               return ha_clock;
             }
             auto now = id(ha_time).now();
             if (!now.is_valid()) {
-              return std::string("--:--:--");
+              return std::string("--:--");
             }
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
+            char buf[8];
+            snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -3064,10 +3048,10 @@ script:
           id: apple_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), " %.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3089,10 +3073,10 @@ script:
           id: apple_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3169,14 +3153,17 @@ script:
           text: !lambda |-
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
+              }
               return ha_clock;
             }
             auto now = id(ha_time).now();
             if (!now.is_valid()) {
-              return std::string("--:--:--");
+              return std::string("--:--");
             }
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
+            char buf[8];
+            snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -3225,10 +3212,10 @@ script:
           id: grid_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), " %.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3250,10 +3237,10 @@ script:
           id: grid_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3330,14 +3317,17 @@ script:
           text: !lambda |-
             std::string ha_clock = id(ha_clock_text).state;
             if (!ha_clock.empty() && ha_clock != "unknown" && ha_clock != "unavailable") {
+              if (ha_clock.size() >= 5 && ha_clock[2] == ':') {
+                return ha_clock.substr(0, 5);
+              }
               return ha_clock;
             }
             auto now = id(ha_time).now();
             if (!now.is_valid()) {
-              return std::string("--:--:--");
+              return std::string("--:--");
             }
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%02d:%02d:%02d", now.hour, now.minute, now.second);
+            char buf[8];
+            snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
             return std::string(buf);
 
       - lvgl.label.update:
@@ -3386,10 +3376,10 @@ script:
           id: skeuo_nozzle
           text: !lambda |-
             if (isnan(id(printer_nozzle_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), " %.0fC", id(printer_nozzle_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_nozzle_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3411,10 +3401,10 @@ script:
           id: skeuo_bed
           text: !lambda |-
             if (isnan(id(printer_bed_temp).state)) {
-              return std::string("--C");
+              return std::string("--");
             }
             char buf[24];
-            snprintf(buf, sizeof(buf), "%.0fC", id(printer_bed_temp).state);
+            snprintf(buf, sizeof(buf), "%.0f", id(printer_bed_temp).state);
             return std::string(buf);
 
       - lvgl.bar.update:
@@ -3921,11 +3911,11 @@ lvgl:
                         text_color: 0xF7FBFF
                     - label:
                         id: clock_value
-                        x: 168
+                        x: 246
                         y: 5
-                        width: 126
-                        text_align: RIGHT
-                        text: "--:--:--"
+                        width: 48
+                        text_align: LEFT
+                        text: "--:--"
                         text_font: font_tactical_clock
                         text_color: 0xF7FBFF
               - obj:
@@ -4049,10 +4039,17 @@ lvgl:
                         id: nozzle_value
                         x: 76
                         y: 5
-                        width: 62
+                        width: 50
                         text_align: RIGHT
-                        text: "--C"
+                        text: "--"
                         text_font: font_orbit_value
+                        text_color: 0xFFAE89
+                    - label:
+                        id: nozzle_unit
+                        x: 130
+                        y: 8
+                        text: "C"
+                        text_font: font_orbit_title
                         text_color: 0xFFAE89
                     - bar:
                         id: nozzle_bar
@@ -4100,10 +4097,17 @@ lvgl:
                         id: bed_value
                         x: 76
                         y: 5
-                        width: 62
+                        width: 50
                         text_align: RIGHT
-                        text: "--C"
+                        text: "--"
                         text_font: font_orbit_value
+                        text_color: 0xEAFBFF
+                    - label:
+                        id: bed_unit
+                        x: 130
+                        y: 8
+                        text: "C"
+                        text_font: font_orbit_title
                         text_color: 0xEAFBFF
                     - bar:
                         id: bed_bar
@@ -4264,11 +4268,11 @@ lvgl:
                         text_color: 0x6F8FC5
                     - label:
                         id: orbit_clock
-                        x: 166
+                        x: 220
                         y: 0
-                        width: 130
-                        text_align: RIGHT
-                        text: "--:--:--"
+                        width: 76
+                        text_align: LEFT
+                        text: "--:--"
                         text_font: font_clock
                         text_color: 0xFFFFFF
               - obj:
@@ -4382,10 +4386,17 @@ lvgl:
                               id: orbit_nozzle
                               x: 94
                               y: 5
-                              width: 62
+                              width: 50
                               text_align: RIGHT
-                              text: "--°C"
+                              text: "--"
                               text_font: font_orbit_value
+                              text_color: 0xFF8A3D
+                          - label:
+                              id: orbit_nozzle_unit
+                              x: 148
+                              y: 8
+                              text: "C"
+                              text_font: font_orbit_title
                               text_color: 0xFF8A3D
                     - obj:
                         x: 0
@@ -4414,10 +4425,17 @@ lvgl:
                               id: orbit_bed
                               x: 94
                               y: 5
-                              width: 62
+                              width: 50
                               text_align: RIGHT
-                              text: "--°C"
+                              text: "--"
                               text_font: font_orbit_value
+                              text_color: 0x55B6FF
+                          - label:
+                              id: orbit_bed_unit
+                              x: 148
+                              y: 8
+                              text: "C"
+                              text_font: font_orbit_title
                               text_color: 0x55B6FF
                     - obj:
                         x: 0
@@ -4640,8 +4658,15 @@ lvgl:
                               id: blueprint_nozzle
                               x: 64
                               y: 7
-                              text: "--C"
+                              text: "--"
                               text_font: montserrat_10
+                              text_color: 0xFF5F2E
+                          - label:
+                              id: blueprint_nozzle_unit
+                              x: 88
+                              y: 9
+                              text: "C"
+                              text_font: montserrat_8
                               text_color: 0xFF5F2E
                           - bar:
                               id: blueprint_nozzle_bar
@@ -4673,8 +4698,15 @@ lvgl:
                               id: blueprint_bed
                               x: 76
                               y: 7
-                              text: "--C"
+                              text: "--"
                               text_font: montserrat_10
+                              text_color: 0x2A9D8F
+                          - label:
+                              id: blueprint_bed_unit
+                              x: 100
+                              y: 9
+                              text: "C"
+                              text_font: montserrat_8
                               text_color: 0x2A9D8F
                           - bar:
                               id: blueprint_bed_bar
@@ -4921,8 +4953,15 @@ lvgl:
                               id: brutal_nozzle
                               x: 92
                               y: 6
-                              text: "--C"
+                              text: "--"
                               text_font: montserrat_12
+                              text_color: 0xFF6B35
+                          - label:
+                              id: brutal_nozzle_unit
+                              x: 118
+                              y: 8
+                              text: "C"
+                              text_font: montserrat_10
                               text_color: 0xFF6B35
                           - bar:
                               id: brutal_nozzle_bar
@@ -4954,8 +4993,15 @@ lvgl:
                               id: brutal_bed
                               x: 102
                               y: 6
-                              text: "--C"
+                              text: "--"
                               text_font: montserrat_12
+                              text_color: 0x3A86FF
+                          - label:
+                              id: brutal_bed_unit
+                              x: 128
+                              y: 8
+                              text: "C"
+                              text_font: montserrat_10
                               text_color: 0x3A86FF
                           - bar:
                               id: brutal_bed_bar
@@ -5157,8 +5203,15 @@ lvgl:
                         id: apple_nozzle
                         x: 62
                         y: 8
-                        text: "--C"
+                        text: "--"
                         text_font: montserrat_12
+                        text_color: 0xFF7043
+                    - label:
+                        id: apple_nozzle_unit
+                        x: 88
+                        y: 10
+                        text: "C"
+                        text_font: montserrat_10
                         text_color: 0xFF7043
                     - bar:
                         id: apple_nozzle_bar
@@ -5190,8 +5243,15 @@ lvgl:
                         id: apple_bed
                         x: 74
                         y: 8
-                        text: "--C"
+                        text: "--"
                         text_font: montserrat_12
+                        text_color: 0x2D9BFF
+                    - label:
+                        id: apple_bed_unit
+                        x: 100
+                        y: 10
+                        text: "C"
+                        text_font: montserrat_10
                         text_color: 0x2D9BFF
                     - bar:
                         id: apple_bed_bar
@@ -5336,8 +5396,15 @@ lvgl:
                         id: grid_nozzle
                         x: 64
                         y: 7
-                        text: "--C"
+                        text: "--"
                         text_font: montserrat_12
+                        text_color: 0xFF8F5A
+                    - label:
+                        id: grid_nozzle_unit
+                        x: 90
+                        y: 9
+                        text: "C"
+                        text_font: montserrat_10
                         text_color: 0xFF8F5A
                     - bar:
                         id: grid_nozzle_bar
@@ -5369,8 +5436,15 @@ lvgl:
                         id: grid_bed
                         x: 72
                         y: 7
-                        text: "--C"
+                        text: "--"
                         text_font: montserrat_12
+                        text_color: 0x66B8FF
+                    - label:
+                        id: grid_bed_unit
+                        x: 98
+                        y: 9
+                        text: "C"
+                        text_font: montserrat_10
                         text_color: 0x66B8FF
                     - bar:
                         id: grid_bed_bar
@@ -5611,8 +5685,15 @@ lvgl:
                         id: skeuo_nozzle
                         x: 62
                         y: 8
-                        text: "--C"
+                        text: "--"
                         text_font: montserrat_12
+                        text_color: 0xFF9A6B
+                    - label:
+                        id: skeuo_nozzle_unit
+                        x: 88
+                        y: 10
+                        text: "C"
+                        text_font: montserrat_10
                         text_color: 0xFF9A6B
                     - bar:
                         id: skeuo_nozzle_bar
@@ -5653,8 +5734,15 @@ lvgl:
                         id: skeuo_bed
                         x: 72
                         y: 8
-                        text: "--C"
+                        text: "--"
                         text_font: montserrat_12
+                        text_color: 0x7FC9FF
+                    - label:
+                        id: skeuo_bed_unit
+                        x: 98
+                        y: 10
+                        text: "C"
+                        text_font: montserrat_10
                         text_color: 0x7FC9FF
                     - bar:
                         id: skeuo_bed_bar
@@ -5770,11 +5858,11 @@ lvgl:
                         text_color: ${color_monitor_muted}
                     - label:
                         id: monitor_clock
-                        x: 130
+                        x: 214
                         y: 4
-                        width: 160
-                        text_align: RIGHT
-                        text: "--:--:--"
+                        width: 76
+                        text_align: LEFT
+                        text: "--:--"
                         text_font: font_clock
                         text_color: ${color_monitor_text}
 
@@ -5883,10 +5971,17 @@ lvgl:
                         id: monitor_nozzle
                         x: 84
                         y: 8
-                        width: 56
+                        width: 44
                         text_align: RIGHT
-                        text: "--C"
+                        text: "--"
                         text_font: font_orbit_value
+                        text_color: ${color_monitor_hot}
+                    - label:
+                        id: monitor_nozzle_unit
+                        x: 132
+                        y: 11
+                        text: "C"
+                        text_font: font_orbit_title
                         text_color: ${color_monitor_hot}
                     - label:
                         id: monitor_bed_title
@@ -5899,10 +5994,17 @@ lvgl:
                         id: monitor_bed
                         x: 84
                         y: 38
-                        width: 56
+                        width: 44
                         text_align: RIGHT
-                        text: "--C"
+                        text: "--"
                         text_font: font_orbit_value
+                        text_color: ${color_monitor_cold}
+                    - label:
+                        id: monitor_bed_unit
+                        x: 132
+                        y: 41
+                        text: "C"
+                        text_font: font_orbit_title
                         text_color: ${color_monitor_cold}
                     - label:
                         id: monitor_power_title
@@ -6116,7 +6218,7 @@ lvgl:
                         y: 50
                         width: 33
                         text_align: LEFT
-                        text: "OFF"
+                        text: "Off"
                         text_font: montserrat_14
                         text_color: ${color_monitor_muted}
                     - obj:
@@ -6325,17 +6427,17 @@ lvgl:
                         bg_color: ${color_monitor_line}
                     - label:
                         id: quick_footer_ip
-                        x: 138
-                        y: 9
-                        width: 116
-                        text_align: RIGHT
+                        x: 142
+                        y: 10
+                        width: 106
+                        text_align: LEFT
                         long_mode: DOT
                         text: "IP: --"
-                        text_font: montserrat_14
+                        text_font: montserrat_12
                         text_color: ${color_monitor_muted}
                     - led:
                         id: quick_footer_online_led
-                        x: 258
+                        x: 254
                         y: 12
                         width: 10
                         height: 10
@@ -6345,10 +6447,10 @@ lvgl:
                         border_width: 0
                     - label:
                         id: quick_footer_online
-                        x: 271
-                        y: 8
-                        width: 45
+                        x: 268
+                        y: 10
+                        width: 50
                         long_mode: DOT
                         text: "Online"
-                        text_font: montserrat_14
+                        text_font: montserrat_12
                         text_color: ${color_monitor_success}
