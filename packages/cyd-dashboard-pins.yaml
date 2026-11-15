@@ -13,16 +13,39 @@ substitutions:
   pin_touch_clk: GPIO25
   pin_touch_mosi: GPIO32
   pin_touch_miso: GPIO39
-  pin_rgb_r: GPIO17
+  # Match the GPIOs used by the dashboard before profile support.
+  pin_rgb_r: GPIO4
   pin_rgb_g: GPIO16
-  pin_rgb_b: GPIO27
+  pin_rgb_b: GPIO17
   
   # ── Display config ─────────────────────────────────────────────────────────
+  # Stable default for genuine 2.8" ILI9341 + XPT2046 CYD boards.
+  # Both ili9xxx and mipi_spi accept the shared fields below.
+  display_driver: ili9xxx
+  display_model: ILI9341
+  display_spi_mode: MODE0
+  display_data_rate: 20MHz
+  display_color_order: bgr
+  display_invert_colors: "false"
+
+  # Logical LVGL/touch area: the dashboard UI is designed for 320x240.
   display_w: "320"
   display_h: "240"
   display_swap_xy: "true"
   display_mirror_x: "false"
   display_mirror_y: "false"
+
+  # Driver framebuffer dimensions; mipi_spi profiles include pad_width/
+  # pad_height=0 to avoid its "Invalid offsets" error with swapped axes.
+  display_dimensions:
+    width: 320
+    height: 240
+    offset_width: 0
+    offset_height: 0
+
+  # The previous hard-coded minimum revision (3.1) prevented older CYDs
+  # from booting (issue #7). Do not force SRAM1-as-IRAM on old bootloaders.
+  minimum_chip_revision: "0.0"
   
   # ── Touch calibration ──────────────────────────────────────────────────────
   touch_swap_xy: "true"
