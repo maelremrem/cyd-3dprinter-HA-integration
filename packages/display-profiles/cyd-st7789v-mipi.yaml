@@ -1,0 +1,19 @@
+# Experimental dual-USB CYD 2.8" with ST7789V display + XPT2046.
+# This does not apply to the ST7789V boards with capacitive touch.
+substitutions:
+  display_driver: mipi_spi
+  display_model: ESP32-2432S028-7789
+  display_spi_mode: MODE0
+  display_data_rate: 20MHz
+  display_color_order: bgr
+  display_invert_colors: "false"
+  display_swap_xy: "true"
+  display_mirror_x: "false"
+  display_mirror_y: "false"
+  display_dimensions:
+    width: 320
+    height: 240
+    offset_width: 0
+    offset_height: 0
+    pad_width: 0
+    pad_height: 0
