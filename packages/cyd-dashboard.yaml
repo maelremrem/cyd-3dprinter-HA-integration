@@ -331,18 +331,21 @@ light:
     restore_mode: ALWAYS_OFF
 
 display:
-  - platform: mipi_spi
+  # Compatibility driver for CYD ILI9341 boards (ESPHome 2026.6+).
+  # mipi_spi can produce pixel streaks on ESP32-2432S028R; see issues #6, #8, #9.
+  # ili9xxx is deprecated upstream and must be revisited before ESPHome 2027.5.
+  - platform: ili9xxx
     id: tft
     spi_id: lcd
     model: ILI9341
     cs_pin: ${pin_tft_cs}
     dc_pin: ${pin_tft_dc}
+    spi_mode: MODE0
     invert_colors: false
     color_order: bgr
-    byte_order: big_endian
+    color_palette: NONE
     data_rate: 20MHz
     auto_clear_enabled: false
-    color_depth: 16
     transform:
       swap_xy: ${display_swap_xy}
       mirror_x: ${display_mirror_x}
