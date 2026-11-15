@@ -1,0 +1,17 @@
+# Genuine ESP32-2432S028R / ILI9341 + XPT2046 (safe default).
+# Legacy ili9xxx is deprecated, scheduled for removal in ESPHome 2027.5.
+substitutions:
+  display_driver: ili9xxx
+  display_model: ILI9341
+  display_spi_mode: MODE0
+  display_data_rate: 20MHz
+  display_color_order: bgr
+  display_invert_colors: "false"
+  display_swap_xy: "true"
+  display_mirror_x: "false"
+  display_mirror_y: "false"
+  display_dimensions:
+    width: 320
+    height: 240
+    offset_width: 0
+    offset_height: 0

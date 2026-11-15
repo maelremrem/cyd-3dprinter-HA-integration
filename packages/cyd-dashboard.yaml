@@ -146,8 +146,7 @@ esp32:
   framework:
     type: arduino
     advanced:
-      minimum_chip_revision: "3.1"
-      sram1_as_iram: true
+      minimum_chip_revision: ${minimum_chip_revision}
 
 
 logger:
@@ -304,15 +303,15 @@ output:
 
   - platform: ledc
     id: output_red
-    pin: GPIO4
+    pin: ${pin_rgb_r}
     inverted: true
   - platform: ledc
     id: output_green
-    pin: GPIO16
+    pin: ${pin_rgb_g}
     inverted: true
   - platform: ledc
     id: output_blue
-    pin: GPIO17
+    pin: ${pin_rgb_b}
     inverted: true
 
 light:
@@ -331,25 +330,26 @@ light:
     restore_mode: ALWAYS_OFF
 
 display:
-  - platform: mipi_spi
+  # Driver/model and native dimensions are selected by hardware substitutions.
+  # The default ILI9341 CYD keeps ili9xxx for affected boards (issues #8/#9).
+  # For mipi_spi, use explicit pad_width/pad_height in display_dimensions to
+  # avoid the invalid-offsets regression (#6); see the display profiles.
+  - platform: ${display_driver}
     id: tft
     spi_id: lcd
-    model: ILI9341
+    model: ${display_model}
     cs_pin: ${pin_tft_cs}
     dc_pin: ${pin_tft_dc}
-    invert_colors: false
-    color_order: bgr
-    byte_order: big_endian
-    data_rate: 20MHz
+    spi_mode: ${display_spi_mode}
+    invert_colors: ${display_invert_colors}
+    color_order: ${display_color_order}
+    data_rate: ${display_data_rate}
     auto_clear_enabled: false
-    color_depth: 16
     transform:
       swap_xy: ${display_swap_xy}
       mirror_x: ${display_mirror_x}
       mirror_y: ${display_mirror_y}
-    dimensions:
-      width: ${display_w}
-      height: ${display_h}
+    dimensions: ${display_dimensions}
     update_interval: never
 
 touchscreen:

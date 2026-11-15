@@ -1,0 +1,20 @@
+# Experimental modern driver for the ILI9341 CYD.
+# Issue #9 reports streaking with mipi_spi on some genuine boards.
+# Use cyd-ili9341-legacy.yaml if the screen is corrupted.
+substitutions:
+  display_driver: mipi_spi
+  display_model: ESP32-2432S028
+  display_spi_mode: MODE0
+  display_data_rate: 20MHz
+  display_color_order: bgr
+  display_invert_colors: "false"
+  display_swap_xy: "true"
+  display_mirror_x: "false"
+  display_mirror_y: "false"
+  display_dimensions:
+    width: 320
+    height: 240
+    offset_width: 0
+    offset_height: 0
+    pad_width: 0
+    pad_height: 0
