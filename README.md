@@ -96,6 +96,8 @@ packages:
   pins: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard-pins.yaml@main
   colors: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard-colors.yaml@main
   dashboard: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard.yaml@main
+  # Optional: add ONE profile below after 'pins' to select a different display:
+  # display_profile: github://maelremrem/cyd-3dprinter-HA-integration/packages/display-profiles/cyd-st7789v-mipi.yaml@main
 ```
 
 ### 2 — Flash
@@ -135,7 +137,7 @@ Quick menu details:
 | **Touch** | XPT2046 resistive touchscreen |
 | **RGB LED** | Built-in on CYD |
 
-> The default configuration targets the **ILI9341-based ESP32-2432S028 / ESP32-2432S028R** with the standard pinout. CYD revisions with ST7789V or ILI9342 controllers need a matching driver/model and possibly different display settings; they are not covered by this default.
+> The default configuration targets the **ILI9341-based ESP32-2432S028 / ESP32-2432S028R**, with XPT2046 resistive touch and a 320×240 landscape layout. Other compatible 320×240 CYD revisions can select a display profile as described below. Verify the actual controller and pinout; USB connector type alone is not sufficient.
 
 ---
 
@@ -199,15 +201,58 @@ I have used [this model](https://makerworld.com/en/models/2787810-cyd-desk-buddy
 
 ---
 
-## 🖥️ Display compatibility (ESPHome 2026.6+)
+## 🖥️ CYD display/controller compatibility (ESPHome 2026.6+)
 
-The dashboard uses the `ili9xxx` display driver by default on the ILI9341 CYD. Some ESP32-2432S028R boards show horizontal streaking or a scrambled screen with `mipi_spi` even though the factory firmware works. The legacy driver has been confirmed working on affected hardware by a user in [issue #9](https://github.com/maelremrem/cyd-3dprinter-HA-integration/issues/9).
+The **default remains the `ili9xxx` ILI9341 driver**, which avoids the horizontal streaking reported on some genuine CYD boards ([#9](https://github.com/maelremrem/cyd-3dprinter-HA-integration/issues/9)). Other supported controller profiles use ESPHome's newer `mipi_spi` driver.
 
-No changes to the printer entities, themes, or touch pin substitutions are required. After upgrading, **recompile and flash** the firmware (the remote GitHub package may be cached).
+| CYD / controller | Driver | Display profile | Status |
+|---|---|---|---|
+| ESP32-2432S028 / ESP32-2432S028R, ILI9341 | `ili9xxx` | `cyd-ili9341-legacy.yaml` | Default; compatibility workaround |
+| Same ILI9341 boards, testing newer ESPHome driver | `mipi_spi` | `cyd-ili9341-mipi.yaml` | Experimental; #9 reports artifacts |
+| 2.8" CYD, ILI9342 (some dual-USB models) | `mipi_spi` | `cyd-ili9342-mipi.yaml` | Experimental, needs device testing |
+| 2.8" CYD, ST7789V (some dual-USB models) | `mipi_spi` | `cyd-st7789v-mipi.yaml` | Experimental, needs device testing |
 
-**Important:** ESPHome has deprecated `ili9xxx` and announced its removal in **2027.5.0**. This is a compatibility workaround, not a permanent upstream solution. The project will need to migrate back to `mipi_spi` once its CYD behavior is verified.
+**Choose a profile:** keep the original `pins`, `colors`, and `dashboard` packages, and append exactly one display profile after `pins`:
 
-If you use a different CYD controller (e.g. ST7789V or ILI9342), do not blindly flash the default ILI9341 configuration; identify the actual display model first.
+```yaml
+packages:
+  pins: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard-pins.yaml@main
+  colors: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard-colors.yaml@main
+  dashboard: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard.yaml@main
+  display_profile: github://maelremrem/cyd-3dprinter-HA-integration/packages/display-profiles/cyd-st7789v-mipi.yaml@main
+```
+
+Do **not** add multiple display profiles simultaneously. With no `display_profile` package, the original ILI9341 setup remains the default. The profile sets the platform, controller model, color order, rotation/transform, and framebuffer dimensions. `mipi_spi` profiles include explicit zero offsets/padding to prevent the `Invalid offsets` error (#6).
+
+**Manual configuration:** you can override profile substitutions in your device YAML, without editing the dashboard:
+
+```yaml
+substitutions:
+  display_driver: mipi_spi
+  display_model: ESP32-2432S028-7789
+  display_spi_mode: MODE0
+  display_data_rate: 20MHz
+  display_color_order: bgr
+  display_invert_colors: "false"
+  display_swap_xy: "true"
+  display_mirror_x: "false"
+  display_mirror_y: "false"
+  display_dimensions:
+    width: 320
+    height: 240
+    offset_width: 0
+    offset_height: 0
+    pad_width: 0
+    pad_height: 0
+```
+
+GPIOs (`pin_spi_*`, `pin_tft_*`, `pin_touch_*`, `pin_rgb_*`) and touchscreen calibration can also be overridden in device substitutions. A separate `display_dimensions` mapping is used for the panel/driver while `display_w` and `display_h` remain **logical UI dimensions**.
+
+**Hardware limits:** these presets target **320×240 landscape** with an **XPT2046 resistive touchscreen** and the standard CYD SPI/pin mapping. Capacitive touch controllers (FT6236/GT911), 480×320 boards, circular displays, ESP32-S3 and different electrical pinouts need additional touchscreen/UI or board adaptation; selecting a display model alone is not enough.
+
+Recompile after changing profiles (`esphome config my-x1c.yaml`, `esphome compile my-x1c.yaml`). ESPHome caches remote packages; using `@main` will only fetch the update after merge. To test a pull request, use its branch ref **on every package** rather than mixing branch and main.
+
+**Deprecation:** ESPHome will remove `ili9xxx` in **2027.5.0**. The legacy profile is an interim compatibility fallback; validate `mipi_spi` on the affected physical board before switching permanently.
 
 ---
 
@@ -217,9 +262,10 @@ If you use a different CYD controller (e.g. ST7789V or ILI9342), do not blindly 
 |---------|-----|
 | Horizontal streaks or scrambled screen on an ILI9341 CYD | Recompile with the latest package using `ili9xxx`; verify the hardware model and try USB flashing if OTA keeps the old firmware |
 | ESPHome `Invalid offsets` for `display.mipi_spi` | Recompile with the updated package, which uses `ili9xxx`. Custom `mipi_spi` configurations must provide consistent dimensions and offsets |
-| Deprecated `ili9xxx` warning | Expected on ESPHome 2026.x; see the planned 2027.5.0 removal above |
+| Deprecated `ili9xxx` warning | Expected on ESPHome 2026.x; use a tested `mipi_spi` profile when available; removal planned for 2027.5.0 |
 | Touch is off / inverted | Adjust `touch_cal_*` and `touch_swap_xy` / `touch_mirror_*` substitutions |
 | Display is mirrored | Set `display_mirror_x` or `display_mirror_y` to `"true"` |
 | No printer data | Check the `printer_*_entity` substitutions in your ESPHome config match your HA integration |
 | Theme not restored after reboot | ESPHome saves theme index to NVS — first reboot after flash resets to default |
+| Bootloop with `Required >= v3.1, found v1.1` | The updated defaults no longer require chip revision 3.1; reflash via USB if the device cannot boot |
 | WiFi fallback AP active | Connect to the `CYD-<short_name>-Fallback` access point and update your Wi-Fi credentials |
