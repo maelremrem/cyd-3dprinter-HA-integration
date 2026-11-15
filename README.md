@@ -135,7 +135,7 @@ Quick menu details:
 | **Touch** | XPT2046 resistive touchscreen |
 | **RGB LED** | Built-in on CYD |
 
-> Any CYD variant with the standard pinout will work. The default pins are configured for the most common version.
+> The default configuration targets the **ILI9341-based ESP32-2432S028 / ESP32-2432S028R** with the standard pinout. CYD revisions with ST7789V or ILI9342 controllers need a matching driver/model and possibly different display settings; they are not covered by this default.
 
 ---
 
@@ -199,10 +199,25 @@ I have used [this model](https://makerworld.com/en/models/2787810-cyd-desk-buddy
 
 ---
 
+## 🖥️ Display compatibility (ESPHome 2026.6+)
+
+The dashboard uses the `ili9xxx` display driver by default on the ILI9341 CYD. Some ESP32-2432S028R boards show horizontal streaking or a scrambled screen with `mipi_spi` even though the factory firmware works. The legacy driver has been confirmed working on affected hardware by a user in [issue #9](https://github.com/maelremrem/cyd-3dprinter-HA-integration/issues/9).
+
+No changes to the printer entities, themes, or touch pin substitutions are required. After upgrading, **recompile and flash** the firmware (the remote GitHub package may be cached).
+
+**Important:** ESPHome has deprecated `ili9xxx` and announced its removal in **2027.5.0**. This is a compatibility workaround, not a permanent upstream solution. The project will need to migrate back to `mipi_spi` once its CYD behavior is verified.
+
+If you use a different CYD controller (e.g. ST7789V or ILI9342), do not blindly flash the default ILI9341 configuration; identify the actual display model first.
+
+---
+
 ## 🔧 Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
+| Horizontal streaks or scrambled screen on an ILI9341 CYD | Recompile with the latest package using `ili9xxx`; verify the hardware model and try USB flashing if OTA keeps the old firmware |
+| ESPHome `Invalid offsets` for `display.mipi_spi` | Recompile with the updated package, which uses `ili9xxx`. Custom `mipi_spi` configurations must provide consistent dimensions and offsets |
+| Deprecated `ili9xxx` warning | Expected on ESPHome 2026.x; see the planned 2027.5.0 removal above |
 | Touch is off / inverted | Adjust `touch_cal_*` and `touch_swap_xy` / `touch_mirror_*` substitutions |
 | Display is mirrored | Set `display_mirror_x` or `display_mirror_y` to `"true"` |
 | No printer data | Check the `printer_*_entity` substitutions in your ESPHome config match your HA integration |
