@@ -46,4 +46,7 @@ packages:
   pins: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard-pins.yaml@main
   colors: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard-colors.yaml@main
   dashboard: github://maelremrem/cyd-3dprinter-HA-integration/packages/cyd-dashboard.yaml@main
+  # Optional: enable exactly ONE profile for a different 320x240 CYD controller.
+  # Uncomment after identifying the actual display chip (ILI9341/ILI9342/ST7789V):
+  # display_profile: github://maelremrem/cyd-3dprinter-HA-integration/packages/display-profiles/cyd-st7789v-mipi.yaml@main
 
